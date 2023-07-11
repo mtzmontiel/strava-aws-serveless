@@ -1,7 +1,19 @@
 # strava-aws-serveless
+
+## What
 Strava API client over aws serverless components
 
-In order to create an API client for Strava there are some bootstrapping steps that need to happen first. The most important is registering an app over Strava which will create a set of credentials that will identify said app going forward. Also while doing so, there is need to have a backend to respond to strava in a certain way.
+## Why
+
+Test and explore serverless capabilities and show how to securely interact with a third party which authorizes users with OAuth.
+
+## How
+
+In order to create an API client for Strava there are some bootstrapping steps that need to happen first. The most important is registering an app over Strava which will create a set of credentials that will identify said app going forward. Also while doing so, there is need to have a backend to respond to strava in a certain way for authorization and for activities incoming from Strava.
+
+Strava API Values and Credentials must be stored in a secure manner but still made available only to required parts of the system. These vales are a client id, a client secret; also while registering an app the Credentials for current user that is registering the app and they are a pair of tokens one for access with expiration of 6 hours and a refresh token that does not expire. This is slightly confusing as there are credentials for an app and credentials for each authenticated user or Athlete. Meaning there should be pairs of credentials per each user which approves this appliation plus the application itself. Also interesting for this is that every time an access token has expired, it must be refreshed with an api call that will respond with the new access token and a new refresh token.
+
+Also per API Terms applications must implement a web hook that can handle deauthorizations, new activities, changes in visibility of activities and also to avoid hitting rate limits.
 
 
 ```mermaid
@@ -13,14 +25,11 @@ C4Context
           System_Boundary(b1, "AWS Serverless API Client") {
             System_Boundary(b3, "Admin Plane") {
               System(credentialsHandler, "App Credentials handler")
-              System(stravaHook, "Authorization Hook Gateway")
+              System(stravaHook, "Strava Hook API Gateway")
               
               SystemDb(CredentialsDb, "Credentials Storage")
-              System(hookHandler, "Hook 1")
+              System(hookHandler, "Hook Handler")
             }
-            
-            
-            
         }
         System_Boundary(b2, "Strava API System") {
           System(stravaApi, "Strava API")
@@ -34,7 +43,8 @@ C4Context
       UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
 
 ```
-...
+
+
 
 ```mermaid
 C4Context
