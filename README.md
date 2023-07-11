@@ -18,70 +18,90 @@ Also per API Terms applications must implement a web hook that can handle deauth
 
 ```mermaid
 C4Context
-      title System Context diagram for Strava API Client
-      Enterprise_Boundary(b0, "API Project Boundary") {
-        Person(admin, "Admin")
+  title System Context diagram for Strava API Client
+  Enterprise_Boundary(b0, "API Project Boundary") {
+    Person(admin, "Admin")
 
-          System_Boundary(b1, "AWS Serverless API Client") {
-            System_Boundary(b3, "Admin Plane") {
-              System(credentialsHandler, "App Credentials handler")
-              System(stravaHook, "Strava Hook API Gateway")
-              
-              SystemDb(CredentialsDb, "Credentials Storage")
-              System(hookHandler, "Hook Handler")
-            }
+      System_Boundary(b1, "AWS Serverless API Client") {
+        System_Boundary(b3, "Admin Plane") {
+          System(credentialsHandler, "App Credentials handler")
+          System(stravaHook, "Strava Hook API Gateway")
+          SystemDb(CredentialsDb, "Credentials Storage")
         }
-        System_Boundary(b2, "Strava API System") {
-          System(stravaApi, "Strava API")
+        Boundary(b5, "API"){
+          System(stravaHook, "Strava Hook API Gateway")
+          System(hookHandler, "Hook Handler")
         }
-      }
-      Rel(credentialsHandler, CredentialsDb, "Uses", "HTTPS")
-      Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
-      Rel(stravaApi, stravaHook, "Uses", "sync/async, JSon/HTTPS")
-      Rel(stravaHook, hookHandler, "Uses", "sync invocation")
-      Rel(admin, credentialsHandler, "Uses", "https")
-      UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
+    }
+    System_Boundary(b2, "Strava API System") {
+      System(stravaApi, "Strava API")
+    }
+  }
+  Rel(credentialsHandler, CredentialsDb, "Uses", "HTTPS")
+  Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
+  Rel(stravaApi, stravaHook, "Uses", "sync/async, JSon/HTTPS")
+  Rel(stravaHook, hookHandler, "Uses", "sync invocation")
+  Rel(admin, credentialsHandler, "Uses", "https")
+  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
 
 ```
 
-
+## Functionality concept map
 
 ```mermaid
 C4Context
-      title System Context diagram for Strava API Client
-      Enterprise_Boundary(b0, "API Project Boundary") {
-        Person(athlete, "Athlete")  
-        Person(admin, "Admin")
+  title System Context diagram for Strava API Client v2
+  Enterprise_Boundary(b0, "API Project Boundary") {
+    Person(athlete, "Athlete")
+    Person(admin, "Admin")
 
-          System_Boundary(b1, "AWS Serverless API Client") {
-            System(athleteAPI, "API Athlete")
-            System_Boundary(b3, "Admin Plane") {
-              System(credentialsHandler, "App Credentials handler")
-              System(stravaHook, "API Hook Gateway")
-              
-              SystemDb(CredentialsDb, "Credentials Storage")
-              System(hookHandler, "Hook 1")
-            }
-            
-            
-            System(activitiesHandler, "Activities handler")
-            
-            SystemDb(ActivitiesDb, "Activities")
-        }
-        System_Boundary(b2, "Strava API System") {
-          System(stravaApi, "Strava API")
-        }
-      }
-      Rel(credentialsHandler, CredentialsDb, "Uses", "HTTPS")
-      Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
-      Rel(stravaApi, stravaHook, "Uses", "sync/async, JSon/HTTPS")
-      Rel(stravaHook, hookHandler, "Uses", "sync invocation")
-      Rel(admin, CredentialsDb, "Stores", "Bootstrap")
-      Rel(athlete, athleteAPI, "Uses", "sync Json/HTTPS")
-      Rel(athleteAPI, activitiesHandler, "Uses", "sync invocation")
-      Rel(activitiesHandler, ActivitiesDb, "Uses", "sync")
-      Rel(activitiesHandler, stravaApi, "Uses", "sync JSon/HTTPS")
+      System_Boundary(b1, "AWS Serverless API Client") {
+        System(athleteUI, "Athlete UI")
+        Boundary(backend, "Backend"){
+          System(athleteAPI, "Athlete API")
+          Boundary(b4, "Activity Plane") {
+            System(athleteHandler, "Athlete hanler")
+            SystemDb(athleteDb, "Athletes Db")
+          }
+          Boundary(b6, "Acrivity Plane"){
+            System(activityHandler, "Activity Handler")
+            SystemDb(activityDb, "Activities Db")
 
-      UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
+          }
+          Boundary(b3, "Admin Plane") {
+            System(credentialsHandler, "App Credentials handler")
+            SystemDb(CredentialsDb, "Credentials Storage")
+          }
+         
+          System(hookHandler, "Hook Handler")
+        }
+    }
+    System_Boundary(b2, "Strava API System") {
+      System(stravaWeb, "Strava Web")
+      System(stravaApi, "Strava API")
+    }
+  }
+  Rel(athlete, stravaWeb, "Uses","https")
+  Rel(athlete, athleteUI, "Uses","https")
+
+  Rel(athleteUI, athleteAPI, "Uses", "https")
+
+  Rel(athleteAPI, athleteHandler, "Uses", "https")
+  Rel(athleteAPI, activityHandler, "Uses", "https")
+  
+  Rel(credentialsHandler, CredentialsDb, "Uses", "HTTPS")
+  Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
+
+  Rel(stravaApi, athleteAPI, "Uses", "sync/async, JSon/HTTPS")
+  Rel(athleteAPI, hookHandler, "Uses", "sync invocation")
+  Rel(hookHandler, activityHandler, "Uses", "sync invocation")
+
+  Rel(hookHandler, athleteHandler, "Uses", "sync invocation")
+  Rel(admin, credentialsHandler, "Uses", "https")
+  Rel(activityHandler, activityDb, "Uses", "https")
+
+  UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="5")
 
 ```
+
+[License](LICENSE.md)
