@@ -75,6 +75,7 @@ C4Context
           Boundary(b7, "Gathering"){
 
             System(gatherer, "Gatherer")
+            SystemQueue(q1,"q1")
           }
           Boundary(b3, "Admin Plane") {
             System(credentialsHandler, "App Credentials Handler")
