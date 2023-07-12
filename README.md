@@ -47,7 +47,7 @@ C4Context
 
 ## Functionality concept map
 
-Once there is an authenticated app there are muliple ways to query for information but for this integration I'll be using only Athletes and SummaryActivities. Given that the credentials (tokens) for the default user are already provided upon registration we can start some designs in that regards but the design will be made to support multiple Athletes from the start
+Once there is an authenticated app there are muliple ways to query for information but for this integration I'll be using only Athletes and SummaryActivities. Given that the credentials (tokens) for the default user are already provided upon registration we can start some designs in that regards but the design will be made to support multiple Athletes from the start.
 
 ```mermaid
 C4Context
@@ -60,6 +60,7 @@ C4Context
         System(athleteUI, "Athlete UI")
         Boundary(backend, "Backend"){
           System(athleteAPI, "Athlete API")
+          System(hookHandler, "Hook Handler")
           Boundary(b4, "Activity Plane") {
             System(athleteHandler, "Athlete Handler")
             System(athleteGatherer, "Athlete gatherer")
@@ -71,12 +72,15 @@ C4Context
             SystemDb(activityDb, "Activities Storage")
 
           }
+          Boundary(b7, "Gathering"){
+
+            System(gatherer, "Gatherer")
+          }
           Boundary(b3, "Admin Plane") {
             System(credentialsHandler, "App Credentials Handler")
             SystemDb(credentialsDb, "Credentials Storage")
           }
-         
-          System(hookHandler, "Hook Handler")
+          
         }
     }
     System_Boundary(b2, "Strava API System") {
@@ -94,21 +98,26 @@ C4Context
   
   Rel(credentialsHandler, credentialsDb, "Uses", "HTTPS")
   Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
-  Rel(athleteGatherer, stravaApi, "Uses", "sync JSon/HTTPS")
-  Rel(activityGatherer, stravaApi, "Uses", "sync JSon/HTTPS")
+  Rel(athleteGatherer, gatherer, "Uses", "sync JSon/HTTPS")
+  Rel(activityGatherer, gatherer, "Uses", "sync JSon/HTTPS")
 
 
   Rel(stravaApi, athleteAPI, "Uses", "sync/async, JSon/HTTPS")
-  Rel(athleteAPI, hookHandler, "Uses", "sync invocation")
+  Rel_D(athleteAPI, hookHandler, "Uses", "sync invocation")
   Rel(hookHandler, activityHandler, "Uses", "sync invocation")
 
   Rel(hookHandler, athleteHandler, "Uses", "sync invocation")
   Rel(admin, credentialsHandler, "Uses", "https")
 
   Rel(athleteHandler, athleteDb, "Reads", "https")
-  Rel(activityHandler, activityDb, "Reads", "https")
+  Rel_L(activityHandler, activityDb, "Reads", "https")
   Rel(athleteGatherer, athleteDb, "Writes", "https")
-  Rel(activityGatherer, activityDb, "Writes", "https")
+  Rel_L(activityGatherer, activityDb, "Writes", "https")
+  Rel(athleteGatherer, credentialsHandler, "Uses", "https")
+  Rel(activityGatherer, credentialsHandler, "Uses", "https")
+  Rel(gatherer, credentialsHandler, "Uses", "https")
+  Rel(gatherer, stravaApi, "Uses", "https")
+
 
   UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="5")
 
