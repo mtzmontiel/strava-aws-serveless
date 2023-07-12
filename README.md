@@ -15,7 +15,6 @@ Strava API Values and Credentials must be stored in a secure manner but still ma
 
 Also per API Terms applications must implement a web hook that can handle deauthorizations, new activities, changes in visibility of activities and also to avoid hitting rate limits.
 
-
 ```mermaid
 C4Context
   title System Context diagram for Strava API Client
@@ -48,6 +47,8 @@ C4Context
 
 ## Functionality concept map
 
+Once there is an authenticated app there are muliple ways to query for information but for this integration I'll be using only Athletes and SummaryActivities. Given that the credentials (tokens) for the default user are already provided upon registration we can start some designs in that regards but the design will be made to support multiple Athletes from the start
+
 ```mermaid
 C4Context
   title System Context diagram for Strava API Client v2
@@ -60,17 +61,19 @@ C4Context
         Boundary(backend, "Backend"){
           System(athleteAPI, "Athlete API")
           Boundary(b4, "Activity Plane") {
-            System(athleteHandler, "Athlete hanler")
-            SystemDb(athleteDb, "Athletes Db")
+            System(athleteHandler, "Athlete Handler")
+            System(athleteGatherer, "Athlete gatherer")
+            SystemDb(athleteDb, "Athletes Storage")
           }
           Boundary(b6, "Acrivity Plane"){
             System(activityHandler, "Activity Handler")
-            SystemDb(activityDb, "Activities Db")
+            System(activityGatherer, "Activity gatherer")
+            SystemDb(activityDb, "Activities Storage")
 
           }
           Boundary(b3, "Admin Plane") {
-            System(credentialsHandler, "App Credentials handler")
-            SystemDb(CredentialsDb, "Credentials Storage")
+            System(credentialsHandler, "App Credentials Handler")
+            SystemDb(credentialsDb, "Credentials Storage")
           }
          
           System(hookHandler, "Hook Handler")
@@ -89,8 +92,11 @@ C4Context
   Rel(athleteAPI, athleteHandler, "Uses", "https")
   Rel(athleteAPI, activityHandler, "Uses", "https")
   
-  Rel(credentialsHandler, CredentialsDb, "Uses", "HTTPS")
+  Rel(credentialsHandler, credentialsDb, "Uses", "HTTPS")
   Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
+  Rel(athleteGatherer, stravaApi, "Uses", "sync JSon/HTTPS")
+  Rel(activityGatherer, stravaApi, "Uses", "sync JSon/HTTPS")
+
 
   Rel(stravaApi, athleteAPI, "Uses", "sync/async, JSon/HTTPS")
   Rel(athleteAPI, hookHandler, "Uses", "sync invocation")
@@ -98,7 +104,11 @@ C4Context
 
   Rel(hookHandler, athleteHandler, "Uses", "sync invocation")
   Rel(admin, credentialsHandler, "Uses", "https")
-  Rel(activityHandler, activityDb, "Uses", "https")
+
+  Rel(athleteHandler, athleteDb, "Reads", "https")
+  Rel(activityHandler, activityDb, "Reads", "https")
+  Rel(athleteGatherer, athleteDb, "Writes", "https")
+  Rel(activityGatherer, activityDb, "Writes", "https")
 
   UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="5")
 
