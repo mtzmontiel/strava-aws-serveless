@@ -49,6 +49,8 @@ C4Context
 
 Once there is an authenticated app there are muliple ways to query for information but for this integration I'll be using only Athletes and SummaryActivities. Given that the credentials (tokens) for the default user are already provided upon registration we can start some designs in that regards but the design will be made to support multiple Athletes from the start.
 
+Given that the models for Athlete and Activities are different and have different conceptually they are modeled as distinct boundaries but as the interaction with Strava API is mostly the same the similar parts will also be separated to a gatherer boundary that can also interact with credentials boundary and no other part of the system besides the admin should interact with it.
+
 ```mermaid
 C4Context
   title System Context diagram for Strava API Client v2
@@ -58,30 +60,33 @@ C4Context
 
       System_Boundary(b1, "AWS Serverless API Client") {
         System(athleteUI, "Athlete UI")
-        Boundary(backend, "Backend"){
+        Boundary(aws, "AWS Cloud"){
           System(athleteAPI, "Athlete API")
-          System(hookHandler, "Hook Handler")
-          Boundary(b4, "Activity Plane") {
-            System(athleteHandler, "Athlete Handler")
-            System(athleteGatherer, "Athlete gatherer")
-            SystemDb(athleteDb, "Athletes Storage")
-          }
-          Boundary(b6, "Acrivity Plane"){
-            System(activityHandler, "Activity Handler")
-            System(activityGatherer, "Activity gatherer")
-            SystemDb(activityDb, "Activities Storage")
+          Boundary(backend, "Backend"){
 
-          }
-          Boundary(b7, "Gathering"){
+            System(hookHandler, "Hook Handler")
+            Boundary(b4, "Activity Plane") {
+              System(athleteHandler, "Athlete Handler")
+              System(athleteGatherer, "Athlete gatherer")
+              SystemDb(athleteDb, "Athletes Storage")
+            }
+            Boundary(b6, "Acrivity Plane"){
+              System(activityHandler, "Activity Handler")
+              System(activityGatherer, "Activity gatherer")
+              SystemDb(activityDb, "Activities Storage")
 
-            System(gatherer, "Gatherer")
-            SystemQueue(q1,"q1")
+            }
+            Boundary(b7, "Gathering"){
+
+              System(gatherer, "Gatherer")
+              SystemQueue(q1,"q1")
+            }
+            Boundary(b3, "Admin Plane") {
+              System(credentialsHandler, "App Credentials Handler")
+              SystemDb(credentialsDb, "Credentials Storage")
+            }
+            
           }
-          Boundary(b3, "Admin Plane") {
-            System(credentialsHandler, "App Credentials Handler")
-            SystemDb(credentialsDb, "Credentials Storage")
-          }
-          
         }
     }
     System_Boundary(b2, "Strava API System") {
@@ -101,6 +106,9 @@ C4Context
   Rel(credentialsHandler, stravaApi, "Uses", "sync JSon/HTTPS")
   Rel(athleteGatherer, gatherer, "Uses", "sync JSon/HTTPS")
   Rel(activityGatherer, gatherer, "Uses", "sync JSon/HTTPS")
+  Rel(gatherer, q1, "Writes", "Events Athletes/Activities")
+  Rel(athleteGatherer, q1, "Reads")
+  Rel(activityGatherer, q1, "Reads")
 
 
   Rel(stravaApi, athleteAPI, "Uses", "sync/async, JSon/HTTPS")
@@ -108,14 +116,13 @@ C4Context
   Rel(hookHandler, activityHandler, "Uses", "sync invocation")
 
   Rel(hookHandler, athleteHandler, "Uses", "sync invocation")
+  Rel(hookHandler, credentialsHandler, "Uses", "sync invocation")
   Rel(admin, credentialsHandler, "Uses", "https")
 
   Rel(athleteHandler, athleteDb, "Reads", "https")
   Rel_L(activityHandler, activityDb, "Reads", "https")
   Rel(athleteGatherer, athleteDb, "Writes", "https")
   Rel_L(activityGatherer, activityDb, "Writes", "https")
-  Rel(athleteGatherer, credentialsHandler, "Uses", "https")
-  Rel(activityGatherer, credentialsHandler, "Uses", "https")
   Rel(gatherer, credentialsHandler, "Uses", "https")
   Rel(gatherer, stravaApi, "Uses", "https")
 
