@@ -3,6 +3,8 @@
 ## What
 Strava API client over aws serverless components
 
+* [Strava API docs](https://developers.strava.com/docs/)
+
 ## Why
 
 Test and explore serverless capabilities and show how to securely interact with a third party which authorizes users with OAuth.
@@ -128,7 +130,13 @@ C4Context
 
 
   UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="5")
-
 ```
+
+  ## Boundaries
+
+  * Credentials. This is the first thing to build as no interaction with Strava API can  happen unless we can identify and authenticate to them.
+  * Gathering. Once credentials are available, interactions with Strava API can be made to obtain Athletes and Activities. This boundary will not store those directly but make them available for other parts of the system to process them accordingly
+  * Athlete Plane. Here information regarding Athletes will be kept, this might have personal information that must not be available to other athletes by Strava API terms and also due to general common practice with Personally Identifiable Data (PII) everywhere in the world.
+  * Activity Plane. Here the critical information is geolocalization so only the main statistics will be stored to avoid further problems as this is a Proof of Concept not a full blown product.
 
 [License](LICENSE.md)
