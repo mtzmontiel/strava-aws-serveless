@@ -24,7 +24,8 @@ C4Context
     Person(admin, "Admin")
 
       System_Boundary(b1, "AWS Serverless API Client") {
-        System_Boundary(b3, "Admin Plane") {
+        System_Boundary(b3, "Credentials Plane") {
+          System(stravaRequester, "Strava Requester")
           System(credentialsHandler, "App Credentials handler")
           System(stravaHook, "Strava Hook API Gateway")
           SystemDb(CredentialsDb, "Credentials Storage")
@@ -43,6 +44,8 @@ C4Context
   Rel(stravaApi, stravaHook, "Uses", "sync/async, JSon/HTTPS")
   Rel(stravaHook, hookHandler, "Uses", "sync invocation")
   Rel(admin, credentialsHandler, "Uses", "https")
+  Rel(stravaRequester, stravaApi, "Uses", "https")
+  Rel(stravaRequester, credentialsHandler, "Uses", "https")
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
 
 ```
@@ -72,7 +75,7 @@ C4Context
               System(athleteGatherer, "Athlete gatherer")
               SystemDb(athleteDb, "Athletes Storage")
             }
-            Boundary(b6, "Acrivity Plane"){
+            Boundary(b6, "Activity Plane"){
               System(activityHandler, "Activity Handler")
               System(activityGatherer, "Activity gatherer")
               SystemDb(activityDb, "Activities Storage")
@@ -83,7 +86,8 @@ C4Context
               System(gatherer, "Gatherer")
               SystemQueue(q1,"q1")
             }
-            Boundary(b3, "Admin Plane") {
+            Boundary(b3, "Credentials Plane") {
+              System(stravaRequester, "Strava Requester")
               System(credentialsHandler, "App Credentials Handler")
               SystemDb(credentialsDb, "Credentials Storage")
             }
@@ -113,6 +117,8 @@ C4Context
   Rel(activityGatherer, q1, "Reads")
 
 
+
+
   Rel(stravaApi, athleteAPI, "Uses", "sync/async, JSon/HTTPS")
   Rel_D(athleteAPI, hookHandler, "Uses", "sync invocation")
   Rel(hookHandler, activityHandler, "Uses", "sync invocation")
@@ -120,15 +126,15 @@ C4Context
   Rel(hookHandler, athleteHandler, "Uses", "sync invocation")
   Rel(hookHandler, credentialsHandler, "Uses", "sync invocation")
   Rel(admin, credentialsHandler, "Uses", "https")
+  Rel(stravaRequester, stravaApi, "Uses", "https")
+  Rel(stravaRequester, credentialsHandler, "Uses", "https")
 
   Rel(athleteHandler, athleteDb, "Reads", "https")
   Rel_L(activityHandler, activityDb, "Reads", "https")
   Rel(athleteGatherer, athleteDb, "Writes", "https")
   Rel_L(activityGatherer, activityDb, "Writes", "https")
-  Rel(gatherer, credentialsHandler, "Uses", "https")
-  Rel(gatherer, stravaApi, "Uses", "https")
-
-
+  Rel(gatherer, stravaRequester, "Uses", "https")
+ 
   UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="5")
 ```
 
