@@ -19,6 +19,37 @@ def write_credentials(credentials, table):
         'updated_at': item['updated_at']
     }
 
+def read_application_credentials(id, table):
+    """
+    Read application credentials from storage
+    """
+    return read_credentials(id, 'application', table)
+
+def read_athlete_credentials(id, table):
+    """
+    Read athlete credentials from storage
+    """
+    return read_credentials(id, 'athlete', table)
+
+def read_credentials(id, credential_type, table):
+    """
+    Read credentials from storage
+    """
+    check_value_in_set(credential_type, ['athlete','application'])
+    pk = f'{credential_type}#{id}'
+    response = table.get_item(Key={'pk': pk})
+    item = response['Item']
+    ret_value= {}
+    ret_value['id'] = id
+    for key in item:
+        if key == 'pk':
+            continue
+        ret_value[key] = item[key]
+    return ret_value
+    
+
+
+
 def create_item(credentials):
     item = {}
     item['pk']= f'{credentials["credential_type"]}#{credentials["id"]}'
