@@ -1,4 +1,4 @@
-
+import datetime
 
 def write_credentials(credentials, table):
     """
@@ -19,7 +19,8 @@ def write_credentials(credentials, table):
 
 def create_item(credentials):
     item = {}
-    item['pk']= credentials['id']
+    item['pk']= f'{credentials["credential_type"]}#{credentials["id"]}'
+    item['updated_at'] = datetime.datetime.now().isoformat()'
     for key in credentials: 
         if key == 'id':
             continue

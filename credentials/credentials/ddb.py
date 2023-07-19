@@ -16,7 +16,8 @@ def create_encrypted_table(table_name, materials_provider):
         default_action=CryptoAction.ENCRYPT_AND_SIGN,
         attribute_actions={
             'expires_at': CryptoAction.DO_NOTHING,
-            'credential_type': CryptoAction.DO_NOTHING
+            'credential_type': CryptoAction.DO_NOTHING,
+            'updated_at': CryptoAction.DO_NOTHING
         }
     )
     return EncryptedTable(table, materials_provider, attribute_actions=attribute_actions)
