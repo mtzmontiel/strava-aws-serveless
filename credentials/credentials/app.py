@@ -13,7 +13,8 @@ def lambda_handler(event, context):
             'body': json.dumps(result)
         }
     except Exception as e:
+        print('Error writing credentials to DDB: {}'.format(e), e)
         return {
             'statusCode': 500,
-            'body': json.dumps(e)
+            'body': json.dumps(str(e))
         }
