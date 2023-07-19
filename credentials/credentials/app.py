@@ -4,8 +4,9 @@ import os
 from ddb import create_table
 from store_credentials import write_credentials
 
+table = create_table(table_name=os.environ['TABLE_NAME'],key_id=os.environ['KEY_ID'])
+
 def lambda_handler(event, context):
-    table = create_table(table_name=os.environ['TABLE_NAME'],key_id=os.environ['KEY_ID'])
     try:
         result = write_credentials(event, table)
         return {
