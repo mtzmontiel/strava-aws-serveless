@@ -4,12 +4,7 @@ def write_credentials(credentials, table):
     """
     Write credentials to storage
     """
-    check_keys_in_dict(credentials, ['id','credential_type'])
-    check_value_in_set(credentials['credential_type'], ['athlete','application'])
-    if credentials['credential_type'] == 'athlete':        
-        check_keys_in_dict(credentials, ['access_token', 'refresh_token', 'expires_at'])
-    elif credentials['credential_type'] == 'application':
-        check_keys_in_dict(credentials, ['application_id', 'application_secret'])
+    validate_credentials(credentials)
     item = create_item(credentials)
     table.put_item(Item=item)
     return {
@@ -19,6 +14,17 @@ def write_credentials(credentials, table):
         'updated_at': item['updated_at']
     }
 
+def validate_credentials(credentials):
+    """
+    Validate credentials
+    """
+    check_keys_in_dict(credentials, ['id','credential_type'])
+    check_value_in_set(credentials['credential_type'], ['athlete','application'])
+    if credentials['credential_type'] == 'athlete':
+        check_keys_in_dict(credentials, ['access_token', 'refresh_token', 'expires_at'])
+    elif credentials['credential_type'] == 'application':
+        check_keys_in_dict(credentials, ['application_id', 'application_secret'])
+    return True
 def read_application_credentials(id, table):
     """
     Read application credentials from storage

@@ -20,7 +20,7 @@ def create_table_without_encryption(table_name):
 
 def create_secure_table(table_name, key_id):
     materials_provider = create_materials_provider(key_id)
-    return create_encrypted_table(table_name, materials_provider)table(table_name, key_id):
+    return create_encrypted_table(table_name, materials_provider)
 
 def create_materials_provider(key_id):
     return AwsKmsCryptographicMaterialsProvider(key_id)
